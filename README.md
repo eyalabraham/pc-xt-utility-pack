@@ -2,6 +2,7 @@
 This is a collection of DOS programs written for DOS 3.31 running on [my PC-XT](https://sites.google.com/site/eyalabraham/pc-xt).
 The programs compile with [Open Watcom C16 Optimizing Compiler](http://www.openwatcom.org/).
 Programs were tested on a DOS 3.31 VM on VMware player ver 15.
+All IP network utilities use my light weight [IP stack](https://github.com/eyalabraham/8bit-TCPIP) and a SLIP connection through the extra serial channel of the Z80-SIO/2.
 
 ## Fixed Disk test utility
 Simple utility that tests the existence of fixed disks on the system and outputs various system data points about the device. It checks the fixed disk count, attempts to read partition table and boot sector of each partition.
@@ -29,7 +30,11 @@ ntp [-u]
 ```
 
 ## TELNET client
-tbd
+A simple telnet client written in C. The client will remain in NVT mode unless the server attempts to negotiate options. In that case the client will respond with WONT to any DO coming from the server except for window size and echo options, and will encourage the server to DO echo and suppress go ahead. When negotiating window (screen) size setting, the client advertises 24 rows x 80 columns.
+Some TELNET servers use VT100 codes that are not processed on this client. Possible enhancement would be to add VT100 code processing.
+```
+telnet ipv4_address [port]
+```
 
 ## FTP client
 tbd

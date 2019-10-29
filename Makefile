@@ -86,7 +86,7 @@ SPC = $(EMPTY) $(EMPTY)
 #------------------------------------------------------------------------------------
 # build all targets
 #------------------------------------------------------------------------------------
-all: disktest xmodem fractal ping ntp
+all: disktest xmodem fractal ping ntp telnet
 
 #------------------------------------------------------------------------------------
 # build common IP stack objects
@@ -137,6 +137,14 @@ ntp.exe: ntp.o $(COREOBJ) $(NETIFOBJ) $(NETWORKOBJ) $(TRANSPORTOBJ)
 ping: ping.exe
 
 ping.exe: ping.o $(COREOBJ) $(NETIFOBJ) $(NETWORKOBJ) $(TRANSPORTOBJ)
+	$(LINK) $(LINKCFG) FILE $(subst $(SPC),$(COM),$(notdir $^)) NAME $@
+
+#------------------------------------------------------------------------------------
+# telnet.exe, TELNET client
+#------------------------------------------------------------------------------------
+telnet: telnet.exe
+
+telnet.exe: telnet.o $(COREOBJ) $(NETIFOBJ) $(NETWORKOBJ) $(TRANSPORTOBJ)
 	$(LINK) $(LINKCFG) FILE $(subst $(SPC),$(COM),$(notdir $^)) NAME $@
 
 #------------------------------------------------------------------------------------

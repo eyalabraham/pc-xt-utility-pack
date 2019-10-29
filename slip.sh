@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #sudo slattach -d -L -p slip -s 4800 /dev/ttyS4 &
+sudo slattach -d -L -p slip -s 9600 /dev/ttyS4 &
 
 sudo ifconfig sl0 mtu 1500 up
 ifconfig sl0
