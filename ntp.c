@@ -26,7 +26,7 @@
 /* -----------------------------------------
    definitions
 ----------------------------------------- */
-#define     USAGE                   "ntp [-u]\n"
+#define     USAGE                   "Usage: ntp [-u | -h]"
 
 // NTP
 #define     NTP_STATE_REQUEST       1               // send a request
@@ -202,7 +202,7 @@ void ntp_response(struct pbuf_t* const p, const ip4_addr_t srcIP, const uint16_t
         time.hsecond = 0;
         _dos_setdate(&date);
         _dos_settime(&time);
-        printf("system time updated\n");
+        printf("System time updated\n");
     }
 
     ntp_request_state = NTP_STATE_COMPLETE;
@@ -242,11 +242,11 @@ int main(int argc, char* argv[])
 
     if( stack_ip4addr_getenv("NTP", &ntp_server_address) )
     {
-        printf("NTP server at %s\n", stack_ip4addr_ntoa(ntp_server_address, ip, sizeof(ip)));
+        printf("Trying NTP server at %s ...\n", stack_ip4addr_ntoa(ntp_server_address, ip, sizeof(ip)));
     }
     else
     {
-        printf("missing or invalid IPv4 NTP server address\n");
+        printf("Missing or invalid IPv4 NTP server address\n");
         return -1;
     }
 
@@ -286,7 +286,7 @@ int main(int argc, char* argv[])
         if ( interface_link_state(netif) != linkState )
         {
             linkState = interface_link_state(netif);
-            printf("link state change, now = '%s'\n", linkState ? "up" : "down");
+            printf("Link state change, now = '%s'\n", linkState ? "up" : "down");
         }
 
         /* periodically poll for received frames,
@@ -320,13 +320,13 @@ int main(int argc, char* argv[])
                  * Exit with error.
                  * Will not happen with SLIP.
                  */
-                printf("cannot resolve NTP server address\n");
+                printf("Cannot resolve NTP server address\n");
                 dos_exit = 1;
                 done = 1;
             }
             else
             {
-                printf("error code %d\n", result);
+                printf("Error code %d\n", result);
                 dos_exit = 1;
                 done = 1;
             }
@@ -345,7 +345,7 @@ int main(int argc, char* argv[])
                 }
                 else
                 {
-                    printf("no response from NTP server\n", result);
+                    printf("No response from NTP server\n", result);
                     dos_exit = 1;
                     done = 1;
                 }

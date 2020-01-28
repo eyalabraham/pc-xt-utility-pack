@@ -36,6 +36,10 @@ Some TELNET servers use VT100 codes that are not processed on this client. Possi
 telnet ipv4_address [port]
 ```
 
+# TED a Tiny EDitor
+This is a small full-screen editor for PC-XT type systems. There are many such editors available for download but all of them use some form of direct video-memory access for performance. [My PC-XT project](https://sites.google.com/site/eyalabraham/pc-xt) does not use a conventional video card, and direct memory access is not an option.  
+This editor implementation only uses the INT 10 BIOS calls, and provides the functionality of a simple full-screen plain-text editor. The editor source code can be found in [this separate repository]().
+
 ## FTP client
 tbd
 

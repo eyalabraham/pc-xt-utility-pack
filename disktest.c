@@ -6,10 +6,11 @@
  */
 
 
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <i86.h>
+#include    <stdio.h>
+#include    <string.h>
+#include    <stdint.h>
+#include    <dos.h>
+#include    <i86.h>
 
 /* Partition table structure
  */
@@ -71,6 +72,26 @@ typedef struct
         uint16_t    free_cluster_count;
     } dpb_t;
 
+/* Hard drive parameter table,
+ * referenced by INT 41h and INT 46H vectors
+ * http://www.techhelpmanual.com/53-hard_disk_parameter_table.html
+ */
+typedef struct
+    {
+        uint16_t    wMaxCyls;           // maximum number of cylinders
+        uint8_t     bMaxHds;            // maximum number of heads
+        uint16_t    wRWCyl;             // starting reduced-write current cylinder
+        uint16_t    wWPCyl;             // starting write pre-compensation cylinder
+        uint8_t     bECCLen;            // maximum ECC data burst length
+        uint8_t     rOptFlags;          // drive step options:
+        uint8_t     bTimeOutStd;        // standard timeout value
+        uint8_t     bTimeOutFmt;        // timeout value for format drive
+        uint8_t     bTimeOutChk;        // timeout value for check drive
+        uint16_t    wLandingZone;
+        uint8_t     bSectorsPerTrack;
+        uint8_t     bReserved;
+    } hdpt_t;
+
 /**************************************************
  *  main()
  */
@@ -86,14 +107,32 @@ void main(void)
     dpb_t __far    *pDPB = 0;
     char            oem_name[8] = {0};
 
-    uint8_t __far   *drive_count;
+    uint8_t __far  *drive_count;
+    hdpt_t __far   *hd_param_table;
 
-    printf("disktest %s %s\n", __DATE__, __TIME__);
+    printf("disktest.exe %s %s\n", __DATE__, __TIME__);
 
     drive_count = (uint8_t __far *)MK_FP(0x40, 0x75);
     drives = (int)(*drive_count);
     printf("BIOS drive count %d\n", drives);
-    printf("===========================\n");
+    printf("===========================\n\n");
+
+    printf("Hard drive parameter table, vector 41h\n");
+    hd_param_table = (hdpt_t __far *) _dos_getvect(0x41);
+
+    printf(" vector %p\n", hd_param_table);
+    printf(" maximum number of cylinders %u\n", hd_param_table->wMaxCyls);
+    printf(" maximum number of heads %u\n", hd_param_table->bMaxHds);
+    printf(" starting reduced-write current cylinder %u\n", hd_param_table->wRWCyl);
+    printf(" starting write pre-compensation cylinder %u\n", hd_param_table->wWPCyl);
+    printf(" maximum ECC data burst length %u\n", hd_param_table->bECCLen);
+    printf(" drive step options 0x%02x\n", hd_param_table->rOptFlags);
+    printf(" standard timeout value %d\n", hd_param_table->bTimeOutStd);
+    printf(" timeout value for format drive %u\n", hd_param_table->bTimeOutFmt);
+    printf(" timeout value for check drive %u\n", hd_param_table->bTimeOutChk);
+    printf(" landing zone %u\n", hd_param_table->wLandingZone);
+    printf(" sectors per track %u\n", hd_param_table->bSectorsPerTrack);
+    printf(" reserved 0x%02x\n\n", hd_param_table->bReserved);
 
     for (drive = 0; drive < drives; drive++)
     {
@@ -298,7 +337,7 @@ void main(void)
         pDPB = MK_FP(segment_regs.ds, regs.w.bx);
         i = 1;
 
-        while ( FP_SEG(pDPB) != 0xffff & FP_OFF(pDPB) != 0xffff )
+        while ( FP_OFF(pDPB) != 0xffff )
         {
             printf("\n dbp #%i\n", i);
             printf("  drive ID %d, unit %d\n", pDPB->drive_id, pDPB->unit_num);
