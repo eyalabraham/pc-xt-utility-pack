@@ -36,9 +36,15 @@ Some TELNET servers use VT100 codes that are not processed on this client. Possi
 telnet ipv4_address [port]
 ```
 
-# TED a Tiny EDitor
+## TED, a Tiny EDitor
 This is a small full-screen editor for PC-XT type systems. There are many such editors available for download but all of them use some form of direct video-memory access for performance. [My PC-XT project](https://sites.google.com/site/eyalabraham/pc-xt) does not use a conventional video card, and direct memory access is not an option.  
 This editor implementation only uses the INT 10 BIOS calls, and provides the functionality of a simple full-screen plain-text editor. The editor source code can be found in [this separate repository]().
+
+## HOST, name server lookup
+This is a simple utility for performing DNS lookups. Similar to the Linux/UNIX command it is  used to convert names to IP addresses and vice versa. __name__ is the domain name that is to be looked up. It can also be a dotted-decimal IPv4 address, in which case **host** will perform a reverse lookup for that address. __server__ is an optional argument which is either the name or IP address of the name server that **host** should query instead of the server provided with environement variable DNS. By default, **host** uses UDP when making queries.
+```
+host [-V | -h] [-R <retry>] [-s <name-server>] [-t <type>] {name}
+```
 
 ## FTP client
 tbd

@@ -66,7 +66,8 @@
 #define     CMD_SUP_GOAHEAD     3
 #define     CMD_WINDOW_SIZE     31
 
-#define     MY_PORT             60001
+#define     TELNET_PORT         23
+#define     MY_PORT             (30000+TELNET_PORT)
 #define     BUFLEN              1536
 
 #define     TELNET_IDLE         0
@@ -164,7 +165,8 @@ int main(int argc , char *argv[])
         printf("missing or invalid GATEWAY. using %s\n", ip);
     }
 
-    /* initialize IP stack and ICMP PING
+    /* initialize IP stack
+     * TODO: Get stack parameters from environment
      */
     stack_init();                                                   // initialize IP stack
     assert(stack_set_route(network_mask, gateway, 0) == ERR_OK);    // setup default route
@@ -184,7 +186,7 @@ int main(int argc , char *argv[])
     assert(tcp_bind(telnet_client, local_host, MY_PORT) == ERR_OK);             // bind
     assert(tcp_notify(telnet_client, notify_callback) == ERR_OK);               // notify on remote connection close
 
-    result = tcp_connect(telnet_client, telnet_server_address ,port);           // try to connect
+    result = tcp_connect(telnet_client, telnet_server_address, port);           // try to connect
     if ( result != ERR_OK )
     {
         printf("connect failed. Error\n");

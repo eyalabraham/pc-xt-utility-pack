@@ -26,7 +26,13 @@
 /* -----------------------------------------
    definitions
 ----------------------------------------- */
-#define     USAGE                   "Usage: ntp [-u | -h]"
+#define     VERSION                 "v1.0"
+#define     USAGE                   "Usage: ntp [-u | -h | -V]"
+#define     HELP                    USAGE                           \
+                                    "\n"                            \
+                                    "-V     Version information\n"  \
+                                    "-u     Update system clock\n"  \
+                                    "-h     Help\n"
 
 // NTP
 #define     NTP_STATE_REQUEST       1               // send a request
@@ -62,6 +68,8 @@
 
 #define     DIFF_SEC_1900_1970      (2208988800UL)  // number of seconds between 1900 and 1970 (MSB=1)
 #define     DIFF_SEC_1970_2036      (2085978496UL)  // number of seconds between 1970 and Feb 7, 2036 (6:28:16 UTC) (MSB=0)
+
+#define     MY_PORT                 (30000+NTP_PORT)
 
 /* -----------------------------------------
    types and data structures
@@ -111,7 +119,7 @@ struct udp_pcb_t   *ntp;
 ip4_addr_t          ntp_server_address;
 int                 ntp_request_state = NTP_STATE_REQUEST;
 int                 dos_time_update = 0;
-char                ip[17];
+char                ip[16] = {0};
 
 /*------------------------------------------------
  * ntp_send_request()
@@ -223,15 +231,23 @@ int main(int argc, char* argv[])
     int                     linkState;
     uint32_t                lastNtpRequest;
 
-    printf("ntp.exe %s %s\n", __DATE__, __TIME__);
-
     /* parse command line variables
      */
     if ( argc == 2 )
     {
-        if ( strcmp(argv[1], "-u") == 0 )
+        if ( strcmp(argv[1], "-V") == 0 )
+        {
+            printf("host.exe %s %s %s\n", VERSION, __DATE__, __TIME__);
+            return 0;
+        }
+        else if ( strcmp(argv[1], "-u") == 0 )
         {
             dos_time_update = 1;
+        }
+        else if ( strcmp(argv[1], "-h") == 0 )
+        {
+            printf("%s\n", HELP);
+            return 0;
         }
         else
         {
@@ -250,7 +266,8 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    /* initialize IP stack and ICMP PING
+    /* initialize IP stack
+     * TODO: Get stack parameters from environment
      */
     stack_init();                                                   // initialize IP stack
     assert(stack_set_route(IP4_ADDR(255,255,255,0),
@@ -274,7 +291,7 @@ int main(int argc, char* argv[])
     udp_init();
     ntp = udp_new();
     assert(ntp);
-    assert(udp_bind(ntp, IP4_ADDR(10,0,0,19), 123) == ERR_OK);
+    assert(udp_bind(ntp, IP4_ADDR(10,0,0,19), MY_PORT) == ERR_OK);
     assert(udp_recv(ntp, ntp_response) == ERR_OK);
     lastNtpRequest = 0;
 

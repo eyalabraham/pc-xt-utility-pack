@@ -3,11 +3,13 @@
  *
  *      Xmodem upload and download utility
  *
- *      usage: xmodem <-r|-s> [-b baud] -f filename
+ *      usage: xmodem <-r|-s> [-b baud] [-h] [-V] -f filename
  *             -s: send to host
  *             -r: receive from host
  *             -b: {optional} 0=110, 1=150, 2=300 , 3=600, 4=1200, 5=2400, 6=4800, 7=9600
  *             -f: file name to send or create/overwrite upon receive
+ *             -h: help
+ *             -V: version
  *
  *      resources:
  *              code based on: https://www.menie.org/georges/embedded/
@@ -79,12 +81,18 @@
 #define     TX_PACKET       128         // Xmodem transmit default packet *** size: 128 or 1024 ***
 #define     XMODEM_SND      1
 #define     XMODEM_RCV      2
-#define     USAGE           "usage: xmodem <-s|-r> [-b baud] -f filename\n"             \
-                            "       -s: send to host\n"                                 \
-                            "       -r: receive from host\n"                            \
-                            "       -b: {default=4} 0=110, 1=150, 2=300, 3=600,\n"      \
+
+#define     VERSION         "v1.0"
+#define     USAGE           "usage: xmodem <-s|-r> [-h] [-V] [-b baud] -f filename"
+#define     HELP            USAGE                                                       \
+                            "\n"                                                        \
+                            "       -s: Send to host\n"                                 \
+                            "       -r: Receive from host\n"                            \
+                            "       -b: {default=6} 0=110, 1=150, 2=300, 3=600,\n"      \
                             "                       4=1200, 5=2400, 6=4800, 7=9600\n"   \
-                            "       -f: file to send or create/overwrite upon receive\n"
+                            "       -f: File to send or create/overwrite upon receive\n"\
+                            "       -h: Help\n"                                         \
+                            "       -V: Version"
 
 typedef enum SendFlag
 {
@@ -128,62 +136,73 @@ char           *errors[ERR_CODES] = {"no data, terminating.",           \
 int main(int argc, char *argv[])
 {
 
-    int         i, function;
-    int         exit_code = 0, baud = 4;
-    char       *file_spec = 0;
+    int         i;
 
-    printf("xmodem %s %s\n", __DATE__, __TIME__);
+    int         function = 0;
+    int         exit_code = 0;
+    int         baud = 6;
+    char       *file_spec = 0;
 
     /* parse command line parameters
      */
-    if ( argc < 4 )
+    for (i = 1; i < argc; i++)
     {
-        printf("%s", USAGE);
-        return -1;
-    }
-    else
-    {
-        for (i = 1; i < argc; i++)
+        if ( strcmp(argv[i], "-s") == 0 )
         {
-            if ( strcmp(argv[i], "-s") == 0 )
+            function = XMODEM_SND;
+        }
+        else if ( strcmp(argv[i], "-r") == 0 )
+        {
+            function = XMODEM_RCV;
+        }
+        else if ( strcmp(argv[i], "-b") == 0 )
+        {
+            i++;
+            baud = atoi(argv[i]);
+            if ( baud < 0 || baud > 7 )
             {
-                function = XMODEM_SND;
-            }
-            else if ( strcmp(argv[i], "-r") == 0 )
-            {
-                function = XMODEM_RCV;
-            }
-            else if ( strcmp(argv[i], "-b") == 0 )
-            {
-                i++;
-                baud = atoi(argv[i]);
-                if ( baud < 0 || baud > 7 )
-                {
-                    printf("Baud rate out of range [0..7]\n");
-                    printf("%s", USAGE);
-                    return -1;
-                }
-            }
-            else if ( strcmp(argv[i], "-f") == 0 )
-            {
-                i++;
-                if ( i < argc )
-                {
-                    file_spec = argv[i];
-                }
-                else
-                {
-                    printf("Missing file name\n");
-                    printf("%s", USAGE);
-                    return -1;
-                }
-            }
-            else
-            {
+                printf("Baud rate out of range [0..7]\n");
                 printf("%s", USAGE);
                 return -1;
             }
         }
+        else if ( strcmp(argv[i], "-f") == 0 )
+        {
+            i++;
+            if ( i < argc )
+            {
+                file_spec = argv[i];
+            }
+            else
+            {
+                printf("Missing file name\n");
+                printf("%s", USAGE);
+                return -1;
+            }
+        }
+        else if ( strcmp(argv[i], "-V") == 0 )
+        {
+            printf("xmodem %s %s %s\n", VERSION, __DATE__, __TIME__);
+            return 0;
+        }
+        else if ( strcmp(argv[i], "-h") == 0 )
+        {
+            printf("%s\n", HELP);
+            return 0;
+        }
+        else
+        {
+            printf("%s", USAGE);
+            return -1;
+        }
+    }
+
+    /* Mandatory variables
+     */
+    if ( file_spec == 0 || function == 0 )
+    {
+        printf("%s", USAGE);
+        return -1;
     }
 
     //printf("function %d, baud %d, file %s\n", function, baud, file_spec);

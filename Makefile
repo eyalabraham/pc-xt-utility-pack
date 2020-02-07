@@ -37,6 +37,7 @@ COREOBJ=$(STACKCORE:.c=.o)
 NETIFOBJ=$(INTERFACESLIPSIO:.c=.o)
 NETWORKOBJ=$(NETWORK:.c=.o)
 TRANSPORTOBJ=$(TRANSPORT:.c=.o)
+SERVICEOBJ=$(SERVICES:.c=.o)
 
 #------------------------------------------------------------------------------------
 # build utilities
@@ -86,7 +87,7 @@ SPC = $(EMPTY) $(EMPTY)
 #------------------------------------------------------------------------------------
 # build all targets
 #------------------------------------------------------------------------------------
-all: disktest xmodem fractal ping ntp telnet
+all: disktest int25 xmodem fractal ping ntp telnet host
 
 #------------------------------------------------------------------------------------
 # build common IP stack objects
@@ -153,6 +154,14 @@ telnet.exe: telnet.o $(COREOBJ) $(NETIFOBJ) $(NETWORKOBJ) $(TRANSPORTOBJ)
 int25: int25.exe
 
 int25.exe: int25.o
+	$(LINK) $(LINKCFG) FILE $(subst $(SPC),$(COM),$(notdir $^)) NAME $@
+
+#------------------------------------------------------------------------------------
+# host.exe, HOST DNS lookup  client
+#------------------------------------------------------------------------------------
+host: host.exe
+
+host.exe: host.o $(COREOBJ) $(NETIFOBJ) $(NETWORKOBJ) $(TRANSPORTOBJ) $(SERVICEOBJ)
 	$(LINK) $(LINKCFG) FILE $(subst $(SPC),$(COM),$(notdir $^)) NAME $@
 
 #------------------------------------------------------------------------------------

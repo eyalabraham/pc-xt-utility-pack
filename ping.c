@@ -25,7 +25,8 @@
 /* -----------------------------------------
    definitions
 ----------------------------------------- */
-#define     USAGE                   "ping  [-c count] [-i interval] destination_ip_address\n"
+#define     VERSION                 "v1.0"
+#define     USAGE                   "ping  [-V] [-c count] [-i interval] destination_ip_address\n"
 
 // PING
 #define     PING_INTERVAL           1000            // interval increments in mSec
@@ -122,8 +123,6 @@ int main(int argc, char* argv[])
 
     struct net_interface_t *netif;
 
-    printf("ping.exe %s %s\n", __DATE__, __TIME__);
-
     /* parse command line variables
      */
     if ( argc == 1 )
@@ -134,7 +133,12 @@ int main(int argc, char* argv[])
 
     for ( i = 1; i < argc; i++ )
     {
-        if ( strcmp(argv[i], "-c") == 0 )
+        if ( strcmp(argv[i], "-V") == 0 )
+        {
+            printf("ping.exe %s %s %s\n", VERSION, __DATE__, __TIME__);
+            return 0;
+        }
+        else if ( strcmp(argv[i], "-c") == 0 )
         {
             /* PING count
              */
@@ -169,6 +173,7 @@ int main(int argc, char* argv[])
     }
 
     /* initialize IP stack and ICMP PING
+     * TODO: Get stack parameters from environment
      */
     stack_init();                                                   // initialize IP stack
     assert(stack_set_route(IP4_ADDR(255,255,255,0),
