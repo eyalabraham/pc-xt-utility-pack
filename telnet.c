@@ -106,14 +106,14 @@ int main(int argc , char *argv[])
 {
     struct net_interface_t *netif;
     struct tcp_conn_state_t telnet_connection_state;
-    ip4_addr_t              telnet_server_address,
-                            local_host = IP4_ADDR(10,0,0,19),
-                            gateway = IP4_ADDR(10,0,0,1),
-                            network_mask = IP4_ADDR(255,255,255,0),
-                            temp;
+    ip4_addr_t              telnet_server_address;
 
     int                     port, linkState, len, rv, i, dos_result = 0;
     ip4_err_t               result;
+
+    ip4_addr_t              gateway = 0;
+    ip4_addr_t              net_mask = 0;
+    ip4_addr_t              local_host = 0;
 
     /* parse command line variables
      */
@@ -133,49 +133,26 @@ int main(int argc , char *argv[])
     if (argc == 3)
         port = atoi(argv[2]);
 
-    /* Get setup from DOS environment
+    /* Initialize IP stack
      */
-    if( stack_ip4addr_getenv("LOCALHOST", &temp) )
+    if ( !stack_ip4addr_getenv("GATEWAY", &gateway) ||
+         !stack_ip4addr_getenv("NETMASK", &net_mask) ||
+         !stack_ip4addr_getenv("LOCALHOST", &local_host) )
     {
-        local_host = temp;
-    }
-    else
-    {
-        stack_ip4addr_ntoa(local_host, ip, sizeof(ip));
-        printf("missing or invalid LOCALHOST address. using %s\n", ip);
+        printf("Missing IP stack environment variable(s)\n");
+        return 1;
     }
 
-    if( stack_ip4addr_getenv("NETMASK", &temp) )
-    {
-        network_mask = temp;
-    }
-    else
-    {
-        stack_ip4addr_ntoa(network_mask, ip, sizeof(ip));
-        printf("missing or invalid NETMASK. using %s\n", ip);
-    }
-
-    if( stack_ip4addr_getenv("GATEWAY", &temp) )
-    {
-        gateway = temp;
-    }
-    else
-    {
-        stack_ip4addr_ntoa(gateway, ip, sizeof(ip));
-        printf("missing or invalid GATEWAY. using %s\n", ip);
-    }
-
-    /* initialize IP stack
-     * TODO: Get stack parameters from environment
-     */
-    stack_init();                                                   // initialize IP stack
-    assert(stack_set_route(network_mask, gateway, 0) == ERR_OK);    // setup default route
-    netif = stack_get_ethif(0);                                     // get pointer to interface 0
+    stack_init();                                       // initialize IP stack
+    assert(stack_set_route(net_mask,
+                           gateway,
+                           0) == ERR_OK);               // setup default route
+    netif = stack_get_ethif(0);                         // get pointer to interface 0
     assert(netif);
 
-    assert(interface_slip_init(netif) == ERR_OK);                   // initialize interface and link HW
-    interface_set_addr(netif, local_host,                           // setup static IP addressing
-                              network_mask,
+    assert(interface_slip_init(netif) == ERR_OK);       // initialize interface and link HW
+    interface_set_addr(netif, local_host,               // setup static IP addressing
+                              net_mask,
                               gateway);
 
     /* initialize telnet TCP client

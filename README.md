@@ -41,7 +41,7 @@ This is a small full-screen editor for PC-XT type systems. There are many such e
 This editor implementation only uses the INT 10 BIOS calls, and provides the functionality of a simple full-screen plain-text editor. The editor source code can be found in [this separate repository]().
 
 ## HOST, name server lookup
-This is a simple utility for performing DNS lookups. Similar to the Linux/UNIX command it is  used to convert names to IP addresses and vice versa. __name__ is the domain name that is to be looked up. It can also be a dotted-decimal IPv4 address, in which case **host** will perform a reverse lookup for that address. __server__ is an optional argument which is either the name or IP address of the name server that **host** should query instead of the server provided with environement variable DNS. By default, **host** uses UDP when making queries.
+This is a simple utility for performing DNS lookups. Similar to the Linux/UNIX command it is  used to convert names to IP addresses and vice versa. __name__ is the domain name that is to be looked up. It can also be a dotted-decimal IPv4 address, in which case **host** will perform a reverse lookup for that address. __server__ is an optional argument which is either the name or IP address of the name server that **host** should query instead of the server provided with environment variable DNS. By default, **host** uses UDP when making queries.
 ```
 host [-V | -h] [-R <retry>] [-s <name-server>] [-t <type>] {name}
 ```
@@ -54,6 +54,10 @@ tbd
 
 ## Embedded Python interpreter and REPL
 tbd
+
+## Environment variable
+
+All network utilities require the setting of DOS environment variables: NETMASK, GATEWAY, and LOCALHOST. See DOS 3.31 manual on how to use SET command in autoexec.bat 
 
 ## SLIP interface setup
 

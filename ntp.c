@@ -231,6 +231,10 @@ int main(int argc, char* argv[])
     int                     linkState;
     uint32_t                lastNtpRequest;
 
+    ip4_addr_t              gateway = 0;
+    ip4_addr_t              net_mask = 0;
+    ip4_addr_t              local_host = 0;
+
     /* parse command line variables
      */
     if ( argc == 2 )
@@ -266,20 +270,27 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    /* initialize IP stack
-     * TODO: Get stack parameters from environment
+    /* Initialize IP stack
      */
-    stack_init();                                                   // initialize IP stack
-    assert(stack_set_route(IP4_ADDR(255,255,255,0),
-                           IP4_ADDR(10,0,0,1),
-                           0) == ERR_OK);                           // setup default route
-    netif = stack_get_ethif(0);                                     // get pointer to interface 0
+    if ( !stack_ip4addr_getenv("GATEWAY", &gateway) ||
+         !stack_ip4addr_getenv("NETMASK", &net_mask) ||
+         !stack_ip4addr_getenv("LOCALHOST", &local_host) )
+    {
+        printf("Missing IP stack environment variable(s)\n");
+        return 1;
+    }
+
+    stack_init();                                       // initialize IP stack
+    assert(stack_set_route(net_mask,
+                           gateway,
+                           0) == ERR_OK);               // setup default route
+    netif = stack_get_ethif(0);                         // get pointer to interface 0
     assert(netif);
 
-    assert(interface_slip_init(netif) == ERR_OK);                   // initialize interface and link HW
-    interface_set_addr(netif, IP4_ADDR(10,0,0,19),                  // setup static IP addressing
-                              IP4_ADDR(255,255,255,0),
-                              IP4_ADDR(10,0,0,1));
+    assert(interface_slip_init(netif) == ERR_OK);       // initialize interface and link HW
+    interface_set_addr(netif, local_host,               // setup static IP addressing
+                              net_mask,
+                              gateway);
 
     /* test link state and send gratuitous ARP
      *
