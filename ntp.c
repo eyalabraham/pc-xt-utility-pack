@@ -18,6 +18,7 @@
 #include    "ip/netif.h"
 #include    "ip/stack.h"
 #include    "ip/udp.h"
+#include    "ip/dnsresolve.h"
 #include    "ip/error.h"
 #include    "ip/types.h"
 
@@ -71,6 +72,8 @@
 
 #define     MY_PORT                 (30000+NTP_PORT)
 
+#define     NAME_LIST_LEN           2               // Get only first two resolutions
+
 /* -----------------------------------------
    types and data structures
 ----------------------------------------- */
@@ -120,6 +123,12 @@ ip4_addr_t          ntp_server_address;
 int                 ntp_request_state = NTP_STATE_REQUEST;
 int                 dos_time_update = 0;
 char                ip[16] = {0};
+
+char                    env_var[256];
+size_t                  env_var_len;
+struct dns_resolution_t ntp_host_resolution;
+struct hostent_t        host_entity[NAME_LIST_LEN];
+dns_result_t            dns_result;
 
 /*------------------------------------------------
  * ntp_send_request()
@@ -223,13 +232,14 @@ void ntp_response(struct pbuf_t* const p, const ip4_addr_t srcIP, const uint16_t
  */
 int main(int argc, char* argv[])
 {
-    int                     done = 0, dos_exit = 0;
-    int                     ntp_request_count = NTP_RETRY_COUNT;
-
+    int                     i;
     ip4_err_t               result;
     struct net_interface_t *netif;
     int                     linkState;
     uint32_t                lastNtpRequest;
+
+    int                     done = 0, dos_exit = 0;
+    int                     ntp_request_count = NTP_RETRY_COUNT;
 
     ip4_addr_t              gateway = 0;
     ip4_addr_t              net_mask = 0;
@@ -260,13 +270,39 @@ int main(int argc, char* argv[])
         }
     }
 
-    if( stack_ip4addr_getenv("NTP", &ntp_server_address) )
+    /* Get and resolve NTP server name or IP address
+     */
+    if ( getenv_s(&env_var_len, env_var, sizeof(env_var), "NTP") == 0 )
     {
-        printf("Trying NTP server at %s ...\n", stack_ip4addr_ntoa(ntp_server_address, ip, sizeof(ip)));
+        if( !stack_ip4addr_aton(env_var, &ntp_server_address) )
+        {
+            memset(host_entity, 0, sizeof(host_entity));
+            ntp_host_resolution.h_list_len = NAME_LIST_LEN;
+            ntp_host_resolution.h_error = DNS_NOT_SET;
+            ntp_host_resolution.h_info_list = host_entity;
+
+            dns_result = dnsresolve_gethostbyname(env_var, &ntp_host_resolution);
+            if ( dns_result == DNS_OK || DNS_OK == DNS_LIST_TRUNC )
+            {
+                for ( i = 0; i < ntp_host_resolution.h_list_len; i ++ )
+                {
+                    if ( host_entity[i].h_type == T_A )
+                    {
+                        stack_ip4addr_aton(host_entity[i].h_aliases, &ntp_server_address);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                printf("Could not resolve NTP host %s (DNS error %d)\n", env_var, dns_result);
+                return -1;
+            }
+        }
     }
     else
     {
-        printf("Missing or invalid IPv4 NTP server address\n");
+        printf("Missing NTP server name or address\n");
         return -1;
     }
 

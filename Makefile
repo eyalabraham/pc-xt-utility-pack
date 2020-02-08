@@ -129,7 +129,7 @@ fractal.exe: fractal.o
 #------------------------------------------------------------------------------------
 ntp: ntp.exe
 
-ntp.exe: ntp.o $(COREOBJ) $(NETIFOBJ) $(NETWORKOBJ) $(TRANSPORTOBJ)
+ntp.exe: ntp.o $(COREOBJ) $(NETIFOBJ) $(NETWORKOBJ) $(TRANSPORTOBJ) $(SERVICEOBJ)
 	$(LINK) $(LINKCFG) FILE $(subst $(SPC),$(COM),$(notdir $^)) NAME $@
 
 #------------------------------------------------------------------------------------
