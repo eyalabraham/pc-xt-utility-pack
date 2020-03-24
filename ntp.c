@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
     {
         if ( strcmp(argv[1], "-V") == 0 )
         {
-            printf("host.exe %s %s %s\n", VERSION, __DATE__, __TIME__);
+            printf("ntp.exe %s %s %s\n", VERSION, __DATE__, __TIME__);
             return 0;
         }
         else if ( strcmp(argv[1], "-u") == 0 )
@@ -338,7 +338,7 @@ int main(int argc, char* argv[])
     udp_init();
     ntp = udp_new();
     assert(ntp);
-    assert(udp_bind(ntp, IP4_ADDR(10,0,0,19), MY_PORT) == ERR_OK);
+    assert(udp_bind(ntp, local_host, MY_PORT) == ERR_OK);
     assert(udp_recv(ntp, ntp_response) == ERR_OK);
     lastNtpRequest = 0;
 
@@ -409,7 +409,7 @@ int main(int argc, char* argv[])
                 }
                 else
                 {
-                    printf("No response from NTP server\n", result);
+                    printf("No response from NTP server\n");
                     dos_exit = 1;
                     done = 1;
                 }

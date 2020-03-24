@@ -233,7 +233,6 @@ int main(int argc, char *argv[])
                 if ( fwrite(buff, sizeof(uint8_t), i, pfile) != i )
                 {
                     printf("output file write error\n");
-                    abort();
                     exit_code = -1;
                     break;
                 }

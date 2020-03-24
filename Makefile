@@ -87,7 +87,7 @@ SPC = $(EMPTY) $(EMPTY)
 #------------------------------------------------------------------------------------
 # build all targets
 #------------------------------------------------------------------------------------
-all: disktest int25 xmodem fractal ping ntp telnet host
+all: disktest int25 xmodem fractal ping ntp telnet host tftp
 
 #------------------------------------------------------------------------------------
 # build common IP stack objects
@@ -162,6 +162,14 @@ int25.exe: int25.o
 host: host.exe
 
 host.exe: host.o $(COREOBJ) $(NETIFOBJ) $(NETWORKOBJ) $(TRANSPORTOBJ) $(SERVICEOBJ)
+	$(LINK) $(LINKCFG) FILE $(subst $(SPC),$(COM),$(notdir $^)) NAME $@
+
+#------------------------------------------------------------------------------------
+# tftp.exe, tftp client
+#------------------------------------------------------------------------------------
+tftp: tftp.exe
+
+tftp.exe: tftp.o $(COREOBJ) $(NETIFOBJ) $(NETWORKOBJ) $(TRANSPORTOBJ)
 	$(LINK) $(LINKCFG) FILE $(subst $(SPC),$(COM),$(notdir $^)) NAME $@
 
 #------------------------------------------------------------------------------------
