@@ -71,6 +71,10 @@ tftp [-V | -h ] [-m <mode>] -g | -p  <file> <host>
 <host>      remote host IPv4 address
 ```
 
+## Sudoku solver
+
+Based on Professor Thorsten Altenkirch's video on a [recursive Sudoku solver](https://www.youtube.com/watch?v=G_UYXzGuqvM) found in the Computerphile channel. This is a brute force recursive algorithm with a 'back tracking' method. The program relies on the functionality of ANSI.SYS for screen presentation.
+
 ## HTTP server
 tbd
 

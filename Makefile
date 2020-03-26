@@ -87,7 +87,7 @@ SPC = $(EMPTY) $(EMPTY)
 #------------------------------------------------------------------------------------
 # build all targets
 #------------------------------------------------------------------------------------
-all: disktest int25 xmodem fractal ping ntp telnet host tftp
+all: disktest int25 xmodem fractal ping ntp telnet host tftp sudoku
 
 #------------------------------------------------------------------------------------
 # build common IP stack objects
@@ -170,6 +170,14 @@ host.exe: host.o $(COREOBJ) $(NETIFOBJ) $(NETWORKOBJ) $(TRANSPORTOBJ) $(SERVICEO
 tftp: tftp.exe
 
 tftp.exe: tftp.o $(COREOBJ) $(NETIFOBJ) $(NETWORKOBJ) $(TRANSPORTOBJ)
+	$(LINK) $(LINKCFG) FILE $(subst $(SPC),$(COM),$(notdir $^)) NAME $@
+
+#------------------------------------------------------------------------------------
+# sudoku.exe, Sudoku solver
+#------------------------------------------------------------------------------------
+sudoku: sudoku.exe
+
+sudoku.exe: sudoku.o
 	$(LINK) $(LINKCFG) FILE $(subst $(SPC),$(COM),$(notdir $^)) NAME $@
 
 #------------------------------------------------------------------------------------
